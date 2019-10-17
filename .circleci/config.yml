@@ -2,13 +2,8 @@ version: 2.1
 
 commands:
   test_command:
-    parameters:
-      environment:
-        type: string
-        default: dev
     steps:
       - checkout
-      # Log the current branch
       - run:
           name: Show current branch
           command: echo ${CIRCLE_BRANCH}
@@ -24,26 +19,25 @@ commands:
           key: v1-dependency-cache-{{ checksum "package.json" }}
           paths:
             - node_modules
-  build_command:
-    parameters:
-      environment:
-        type: string
-        default: dev
-    steps:
-      - checkout
-      - restore_cache:
-          key: v1-dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: Install Dependencies
-          command: npm install
-      - save_cache:
-          key: v1-dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - run:
-          name: Create Production Build
-          command: npm run build -- --prod --configuration=<< parameters.environment >> --no-progress
-
+#  build_command:
+#    parameters:
+#      environment:
+#        type: string
+#        default: dev
+#    steps:
+#      - checkout
+#      - restore_cache:
+#          key: v1-dependency-cache-{{ checksum "package.json" }}
+#      - run:
+#          name: Install Dependencies
+#          command: npm install
+#      - save_cache:
+#          key: v1-dependency-cache-{{ checksum "package.json" }}
+#          paths:
+#            - node_modules
+#      - run:
+#          name: Create Production Build
+#          command: npm run build -- --prod --configuration=<< parameters.environment >> --no-progress
 
 jobs:
   unit_test:
