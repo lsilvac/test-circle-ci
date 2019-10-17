@@ -19,25 +19,25 @@ commands:
           key: v1-dependency-cache-{{ checksum "package.json" }}
           paths:
             - node_modules
-#  build_command:
-#    parameters:
-#      environment:
-#        type: string
-#        default: dev
-#    steps:
-#      - checkout
-#      - restore_cache:
-#          key: v1-dependency-cache-{{ checksum "package.json" }}
-#      - run:
-#          name: Install Dependencies
-#          command: npm install
-#      - save_cache:
-#          key: v1-dependency-cache-{{ checksum "package.json" }}
-#          paths:
-#            - node_modules
-#      - run:
-#          name: Create Production Build
-#          command: npm run build -- --prod --configuration=<< parameters.environment >> --no-progress
+  build_command:
+    parameters:
+      environment:
+        type: string
+        default: dev
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Create Production Build
+          command: npm run build -- --prod --configuration=<< parameters.environment >> --no-progress
 
 jobs:
   unit_test:
@@ -62,7 +62,15 @@ jobs:
           command: ng e2e --protractor-config=e2e/protractor-ci.conf.js
       - store_test_results:
           path: ~/report
-
+  build_job:
+    working_directory: ~/my-project
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - build_command
+      - run:
+          name: Echo de hola pepe
+          command: echo "hola pepe"
 
 workflows:
   version: 2.1
@@ -70,3 +78,7 @@ workflows:
     jobs:
       - unit_test
       - integration_test
+      - build_job:
+          requires:
+            - unit_test
+            - integration_test
