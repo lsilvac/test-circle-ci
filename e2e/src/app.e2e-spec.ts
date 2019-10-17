@@ -13,6 +13,16 @@ describe('workspace-project App', () => {
     expect(page.getTitleText()).toEqual('test-circle-ci app is running!');
   });
 
+  it('should be pass', () => {
+    page.navigateTo();
+    expect(true).toBe(true);
+  });
+
+  it('should be fail', () => {
+    page.navigateTo();
+    expect(true).toBe(true);
+  });
+
   afterEach(async () => {
     // Assert that there are no errors emitted from the browser
     const logs = await browser.manage().logs().get(logging.Type.BROWSER);

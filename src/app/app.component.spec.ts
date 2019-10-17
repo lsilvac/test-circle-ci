@@ -28,4 +28,12 @@ describe('AppComponent', () => {
     const compiled = fixture.debugElement.nativeElement;
     expect(compiled.querySelector('.content span').textContent).toContain('test-circle-ci app is running!');
   });
+
+  it('shoud fail with circleci', () => {
+    expect(true).toBe(true);
+  });
+
+  it('shoud pass with circleci', () => {
+    expect(true).toBe(true);
+  });
 });
