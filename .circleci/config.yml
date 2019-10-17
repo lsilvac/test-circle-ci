@@ -10,9 +10,6 @@ commands:
       - restore_cache:
           key: v1-dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: Installing global angular cli
-          command: sudo npm install -g --ignore-scripts @angular/cli@8.3.9
-      - run:
           name: Installing npm dependency
           command: npm install
       - save_cache:
@@ -23,7 +20,7 @@ commands:
     parameters:
       environment:
         type: string
-        default: dev
+        default: prod
     steps:
       - checkout
       - restore_cache:
@@ -48,7 +45,7 @@ jobs:
       - test_command
       - run:
           name: Ejecutando test de integracion
-          command: ng test --no-watch --no-progress --browsers=ChromeHeadlessCI
+          command: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
       - store_test_results:
           path: ~/my-project/report
   integration_test:
@@ -59,7 +56,7 @@ jobs:
       - test_command
       - run:
           name: Ejecutando test de unidad
-          command: ng e2e --protractor-config=e2e/protractor-ci.conf.js
+          command: npm run e2e -- --protractor-config=e2e/protractor-ci.conf.js
       - store_test_results:
           path: ~/report
   build_job:
