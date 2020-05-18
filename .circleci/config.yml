@@ -20,7 +20,7 @@ commands:
     parameters:
       environment:
         type: string
-        default: prod
+        default: production
     steps:
       - checkout
       - restore_cache:
