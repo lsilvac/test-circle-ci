@@ -1,34 +1,51 @@
-version: 2
+version: 2.1
+
+commands:
+  test_command:
+    steps:
+      - checkout
+      - run:
+          name: Show current branch
+          command: echo ${CIRCLE_BRANCH}
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Installing npm dependency
+          command: npm install
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+  build_command:
+    parameters:
+      environment:
+        type: string
+        default: production
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Create Production Build
+          command: npm run build -- --prod --configuration=<< parameters.environment >> --no-progress
+
 jobs:
   unit_test:
     working_directory: ~/my-project
     docker:
       - image: circleci/node:10-browsers
     steps:
-      - checkout
-      # Log the current branch
+      - test_command
       - run:
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
-      # Restore local dependencies from cache
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "package-lock.json" }}
-          - v1-dependencies-
-      - run:
-          name: Installing global angular cli
-          command: sudo npm install -g --ignore-scripts @angular/cli@8.3.9
-      - run:
-          run: Installing npm dependency
-          command: npm install
-      # Cache local dependencies if they don't exist
-      - save_cache:
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
-          paths:
-              - node_modules
-      - run:
-          name: Ejecutando test de unidad
-          command: ng test --no-watch --no-progress --browsers=ChromeHeadlessCI
+          name: Ejecutando test de integracion
+          command: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
       - store_test_results:
           path: ~/my-project/report
   integration_test:
@@ -36,35 +53,29 @@ jobs:
     docker:
       - image: circleci/node:10-browsers
     steps:
-      - checkout
-      # Log the current branch
-      - run:
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
-      # Restore local dependencies from cache
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "package-lock.json" }}
-          - v1-dependencies-
-      - run:
-          name: Installing global angular cli
-          command: sudo npm install -g --ignore-scripts @angular/cli@8.3.9
-      - run:
-          run: Installing npm dependency
-          command: npm install
-      # Cache local dependencies if they don't exist
-      - save_cache:
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
-          paths:
-              - node_modules
+      - test_command
       - run:
           name: Ejecutando test de unidad
-          command: ng e2e --protractor-config=e2e/protractor-ci.conf.js
+          command: npm run e2e -- --protractor-config=e2e/protractor-ci.conf.js
       - store_test_results:
           path: ~/report
+  build_job:
+    working_directory: ~/my-project
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - build_command
+      - run:
+          name: Echo de hola pepe
+          command: echo "hola pepe"
+
 workflows:
-  version: 2
+  version: 2.1
   secuencia:
     jobs:
       - unit_test
       - integration_test
+      - build_job:
+          requires:
+            - unit_test
+            - integration_test

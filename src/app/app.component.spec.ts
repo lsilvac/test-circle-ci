@@ -30,7 +30,7 @@ describe('AppComponent', () => {
   });
 
   it('shoud fail with circleci', () => {
-    expect(true).toBe(true);
+    expect(false).toBe(false);
   });
 
   it('shoud pass with circleci', () => {
